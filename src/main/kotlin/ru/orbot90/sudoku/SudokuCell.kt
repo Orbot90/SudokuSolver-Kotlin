@@ -1,9 +1,11 @@
 package ru.orbot90.sudoku
 
-class SudokuCell(var cellValue: Int, private val performedActionSubscriber: () -> Unit) {
+class SudokuCell(var cellValue: Int = 0) {
 
     private val possibleValuesSet: MutableSet<Int> = HashSet()
     private var cellResolved: Boolean = (cellValue != 0)
+    @Transient
+    private var performActionSubscriber: (() -> Unit)? = null
 
     init {
         for (possibleValue in 1..9) {
@@ -15,9 +17,11 @@ class SudokuCell(var cellValue: Int, private val performedActionSubscriber: () -
         if (this.cellResolved) {
             return
         }
-        this.possibleValuesSet.remove(excludedValue)
+        val removed = this.possibleValuesSet.remove(excludedValue)
         this.checkForOnlyPossibleValue()
-        this.performedActionSubscriber()
+        if (removed) {
+            performActionSubscriber?.let { it() }
+        }
     }
 
     private fun checkForOnlyPossibleValue() {
@@ -36,10 +40,20 @@ class SudokuCell(var cellValue: Int, private val performedActionSubscriber: () -
         }
         this.cellValue = value
         this.cellResolved = true
-        this.performedActionSubscriber()
+        performActionSubscriber?.let { it() }
     }
 
     fun isCellResolved(): Boolean {
         return this.cellResolved
+    }
+
+    fun initializeGuessValue(guessFrame: GuessProcessor.GuessFrame) {
+        val guessValue = this.possibleValuesSet.first()
+        this.resolveValue(guessValue)
+        guessFrame.initializeGuessValue(guessValue)
+    }
+
+    fun initSubscriber(subscriber: () -> Unit) {
+        this.performActionSubscriber = subscriber
     }
 }

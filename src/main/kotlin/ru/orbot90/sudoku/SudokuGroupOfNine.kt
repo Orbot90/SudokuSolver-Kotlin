@@ -8,26 +8,25 @@ class SudokuGroupOfNine(private val groupCells: Set<SudokuCell>) {
         }
     }
 
-    fun isGroupValid(): Boolean {
+    fun validateGroup() {
         for (value in 1..9) {
             if (this.isValueRepeatingInGroup(value)) {
-                return false
+                throw CellGroupValidationException()
             }
         }
-        return true
     }
 
     private fun isValueRepeatingInGroup(value: Int): Boolean {
         var valueEntryCount = 0
         for (cell in this.groupCells) {
             if (cell.cellValue == value) {
-                if (valueEntryCount > 0) {
-                    return false
-                }
                 valueEntryCount++
+                if (valueEntryCount > 1) {
+                    return true
+                }
             }
         }
-        return true
+        return false
     }
 
     fun removeResolvedValuesFromPossible() {

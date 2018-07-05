@@ -1,5 +1,7 @@
 package ru.orbot90.sudoku
 
+import com.google.gson.Gson
+
 class Sudoku(sudokuArray: Array<IntArray>, private val performedActionSubscriber: () -> Unit) {
 
     val solved : Boolean
@@ -18,7 +20,7 @@ class Sudoku(sudokuArray: Array<IntArray>, private val performedActionSubscriber
     private val sudokuCells : Array<Array<SudokuCell>> = Array(9)
         {
             Array(9)
-            { SudokuCell(0, performedActionSubscriber) }
+            { SudokuCell(0) }
         }
 
     private val sectorMappings : Array<SectorMapping> = Array(9)
@@ -78,6 +80,57 @@ class Sudoku(sudokuArray: Array<IntArray>, private val performedActionSubscriber
             }
         }
         return SudokuGroupOfNine(groupCells)
+    }
+
+    fun initGuessFrame(guessFrame: GuessProcessor.GuessFrame) {
+        for (rowIndex in 0..8) {
+            for (columnIndex in 0..8) {
+                val cell = this.sudokuCells[rowIndex][columnIndex]
+                if (!cell.isCellResolved()) {
+                    cell.initializeGuessValue(guessFrame)
+                    guessFrame.initializeGuessPosition(rowIndex, columnIndex)
+                    return
+                }
+            }
+        }
+    }
+
+    fun excludeValueInPosition(position: Pair<Int, Int>, value: Int) {
+        this.sudokuCells[position.first][position.second].excludeValue(value)
+    }
+
+    fun getCellsStateJson(): String {
+        return Gson().toJson(this.sudokuCells)
+    }
+
+    fun restoreCellsStateFromJson(sudokuCellsStateJson: String) {
+        val restoredCells = Gson().fromJson(sudokuCellsStateJson, Array<Array<SudokuCell>>::class.java)
+        for (rowIndex in 0..8) {
+            for (columnIndex in 0..8) {
+                this.sudokuCells[rowIndex][columnIndex] = restoredCells[rowIndex][columnIndex]
+            }
+        }
+        this.subscribeOnCells(performedActionSubscriber)
+    }
+
+    fun subscribeOnCells(subscriber: () -> Unit) {
+        this.sudokuCells.forEach {
+            it.forEach {
+                it.initSubscriber(subscriber)
+            }
+        }
+    }
+
+    fun getValuesJson(): String {
+        val valuesArr = Array(9) { IntArray(9) }
+
+        for (rowIndex in 0..8) {
+            for (columnIndex in 0..8) {
+                valuesArr[rowIndex][columnIndex] = this.sudokuCells[rowIndex][columnIndex].cellValue
+            }
+        }
+
+        return Gson().toJson(valuesArr)
     }
 
     private class SectorMapping(val sectorNumber: Int, val indexRanges: IndexRanges)
