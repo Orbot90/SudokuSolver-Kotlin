@@ -3,12 +3,9 @@ package ru.orbot90.sudoku
 class Sudoku(sudokuArray: Array<IntArray>, private val performedActionSubscriber: () -> Unit) {
 
     val solved : Boolean
-        get() {
-            return this.isAllCellsHaveResolvedValues()
-        }
+        get() = this.isAllCellsHaveResolvedValues()
 
     private fun isAllCellsHaveResolvedValues(): Boolean {
-
         this.sudokuCells.forEach {
             it.forEach {
                 if (!it.isCellResolved()) {
