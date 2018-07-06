@@ -1,0 +1,4 @@
+.sudokuSector {
+    -fx-border-width: 2px;
+    -fx-border-color: #000;
+}
