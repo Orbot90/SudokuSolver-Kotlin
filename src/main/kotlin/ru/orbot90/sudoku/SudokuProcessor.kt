@@ -16,6 +16,12 @@ class SudokuProcessor {
         this.writeSolvedResultToFile(sudoku)
     }
 
+    fun solveSudoku(sudokuValues: Array<IntArray>): String {
+        val sudoku = Sudoku(sudokuValues, this::onActionPerformed)
+        this.solveSudoku(sudoku)
+        return sudoku.getValuesJson()
+    }
+
     private fun writeSolvedResultToFile(sudoku: Sudoku) {
         val result = sudoku.getValuesJson()
         File("sudoku-result.jsn")
@@ -58,7 +64,7 @@ class SudokuProcessor {
         group.resolveUniquePossibleValuesInGroup()
     }
 
-    private fun retrieveSudokuFromFile(filePath: String) : Array<IntArray> {
+    fun retrieveSudokuFromFile(filePath: String) : Array<IntArray> {
         val jsonText = this.retrieveSudokuJsonFromFile(filePath)
         return this.retrieveSudokuArrayFromJson(jsonText)
     }
