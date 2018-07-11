@@ -67,6 +67,21 @@ class SudokuMainWindowController {
         }
     }
 
+    @FXML
+    fun loadFromFile() {
+        val sudokuArr = sudokuProcessor.retrieveSudokuFromFile("sudoku.jsn")
+        for (rowIndex in 0..8) {
+            for (columnIndex in 0..8) {
+                val cellValue = sudokuArr[rowIndex][columnIndex]
+                if (cellValue != 0) {
+                    val text = this.sudokuCellBoxes[rowIndex][columnIndex].children[0] as Text
+                    text.text = cellValue.toString()
+                }
+            }
+        }
+    }
+
+    @FXML
     fun solveSudoku() {
         val valuesArr = Array(9) {
             IntArray(9)
@@ -97,5 +112,29 @@ class SudokuMainWindowController {
                 }
             }
         }
+    }
+
+    fun validateSudoku() {
+        try {
+            val valuesArr = Array(9) {
+                IntArray(9)
+            }
+            for (rowIndex in 0..8) {
+                for (columnIndex in 0..8) {
+                    val text = this.sudokuCellBoxes[rowIndex][columnIndex].children[0]
+                    val textVal = (if (text is Text) text.text else
+                        (if (text is TextField) text.text else ""))
+                    if (textVal.isNotBlank()) {
+                        val cellValue = Integer.valueOf(textVal)
+                        valuesArr[rowIndex][columnIndex] = cellValue
+                    }
+                }
+            }
+            val result = sudokuProcessor.validateSudoku(valuesArr)
+        } catch (e: InvalidSudokuException) {
+            println(e.message)
+            return
+        }
+        println("Sudoku is valid!")
     }
 }

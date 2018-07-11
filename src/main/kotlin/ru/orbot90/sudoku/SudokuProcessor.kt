@@ -58,10 +58,80 @@ class SudokuProcessor {
         }
     }
 
+    fun validateSudoku(sudokuArray: Array<IntArray>) {
+        val sudoku = Sudoku(sudokuArray, this::onActionPerformed)
+
+        sudoku.subscribeOnCells(this::onActionPerformed)
+        this.guessProcessor = GuessProcessor(sudoku)
+        var validationFinished = false
+        var solutionFound = false
+        while (!validationFinished) {
+            try {
+                this.actionPerformedDuringCycle = false
+                for (rowNumber in 0..8) {
+                    this.processGroup(sudoku.getRow(rowNumber))
+                }
+
+                for (columnNumber in 0..8) {
+                    this.processGroup(sudoku.getColumn(columnNumber))
+                }
+
+                for (sectorNumber in 0..8) {
+                    this.processGroup(sudoku.getSector(sectorNumber))
+                }
+                if (!actionPerformedDuringCycle) {
+                    this.guessProcessor.performGuess()
+                }
+
+                if (sudoku.solved) {
+                    this.validateAllGroups(sudoku)
+                    if (solutionFound) {
+                        throw InvalidSudokuException("Sudoku has more than one solution")
+                    }
+                    solutionFound = true
+                    try {
+                        this.guessProcessor.restoreSudokuStateFromGuessFrame()
+                    } catch (e: NoSudokuStateToRestoreException) {
+                        if (!solutionFound) {
+                            throw InvalidSudokuException("Sudoku has no solution")
+                        } else {
+                            validationFinished = true
+                        }
+                    }
+                }
+            } catch (e: CellGroupValidationException) {
+                try {
+                    this.guessProcessor.restoreSudokuStateFromGuessFrame()
+                } catch (e: NoSudokuStateToRestoreException) {
+                    if (!solutionFound) {
+                        throw InvalidSudokuException("Sudoku has no solution")
+                    } else {
+                        validationFinished = true
+                    }
+                }
+            }
+        }
+    }
+
     private fun processGroup(group: SudokuGroupOfNine) {
         group.validateGroup()
         group.removeResolvedValuesFromPossible()
         group.resolveUniquePossibleValuesInGroup()
+    }
+
+    private fun validateAllGroups(sudoku: Sudoku) {
+        this.actionPerformedDuringCycle = false
+        for (rowNumber in 0..8) {
+            sudoku.getRow(rowNumber).validateGroup()
+        }
+
+        for (columnNumber in 0..8) {
+            sudoku.getColumn(columnNumber).validateGroup()
+        }
+
+        for (sectorNumber in 0..8) {
+            sudoku.getSector(sectorNumber).validateGroup()
+        }
     }
 
     fun retrieveSudokuFromFile(filePath: String) : Array<IntArray> {

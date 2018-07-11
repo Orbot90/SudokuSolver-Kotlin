@@ -13,9 +13,13 @@ class GuessProcessor(val sudoku: Sudoku) {
     }
 
     fun restoreSudokuStateFromGuessFrame(){
-        val frame = guessStack.pop()
-        this.sudoku.restoreCellsStateFromJson(frame.sudokuCellsStateJson)
-        this.sudoku.excludeValueInPosition(frame.guessPosition, frame.guessValue)
+        try {
+            val frame = guessStack.pop()
+            this.sudoku.restoreCellsStateFromJson(frame.sudokuCellsStateJson)
+            this.sudoku.excludeValueInPosition(frame.guessPosition, frame.guessValue)
+        } catch (e: EmptyStackException) {
+            throw NoSudokuStateToRestoreException()
+        }
     }
 
     class GuessFrame(sudoku : Sudoku) {
