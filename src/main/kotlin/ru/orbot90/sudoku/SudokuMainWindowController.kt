@@ -43,8 +43,10 @@ class SudokuMainWindowController {
                 textInput.styleClass.add("sudokucell")
                 textInput.requestFocus()
                 textInput.textProperty().addListener { observable: ObservableValue<out String>, oldValue: String, newValue: String ->
-                    if (newValue.length > 1) {
-                        textInput.text = oldValue
+                    if (newValue.isNotEmpty()) {
+                        if (newValue.length > 1 || newValue.toIntOrNull() == null || newValue.toInt() <= 0) {
+                            textInput.text = oldValue
+                        }
                     }
                 }
                 textInput.onAction = EventHandler {
@@ -67,7 +69,6 @@ class SudokuMainWindowController {
         }
     }
 
-    @FXML
     fun loadFromFile() {
         val sudokuArr = sudokuProcessor.retrieveSudokuFromFile("sudoku.jsn")
         for (rowIndex in 0..8) {
@@ -81,7 +82,6 @@ class SudokuMainWindowController {
         }
     }
 
-    @FXML
     fun solveSudoku() {
         val valuesArr = Array(9) {
             IntArray(9)
@@ -130,7 +130,7 @@ class SudokuMainWindowController {
                     }
                 }
             }
-            val result = sudokuProcessor.validateSudoku(valuesArr)
+            sudokuProcessor.validateSudoku(valuesArr)
         } catch (e: InvalidSudokuException) {
             println(e.message)
             return
