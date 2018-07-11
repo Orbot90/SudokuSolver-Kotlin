@@ -51,7 +51,6 @@
             <VBox GridPane.columnIndex="6" GridPane.rowIndex="6" GridPane.columnSpan="3" GridPane.rowSpan="3" styleClass="sudokuSector" />
         </GridPane>
 
-        <Button minHeight="50" minWidth="80" onAction="#loadFromFile">Load sudoku from file</Button>
         <Button minWidth="80" minHeight="50" onAction="#solveSudoku">
             Solve
         </Button>
