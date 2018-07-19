@@ -4,10 +4,16 @@ import com.google.gson.Gson
 import javafx.beans.value.ObservableValue
 import javafx.event.EventHandler
 import javafx.fxml.FXML
+import javafx.geometry.Pos
 import javafx.scene.control.TextField
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
+import javafx.scene.Scene
+import javafx.stage.Modality
+import javafx.stage.Stage
+
+
 
 class SudokuMainWindowController {
 
@@ -16,6 +22,7 @@ class SudokuMainWindowController {
     private lateinit var sudokuCellBoxes: Array<Array<VBox>>
     private val sudokuProcessor = SudokuProcessor()
     private var selectedBox: VBox? = null
+    lateinit var primaryStage: Stage
 
     fun initialize() {
         sudokuCellBoxes = Array(9) {Array(9) {
@@ -115,6 +122,7 @@ class SudokuMainWindowController {
     }
 
     fun validateSudoku() {
+        var validationResult: String
         try {
             val valuesArr = Array(9) {
                 IntArray(9)
@@ -131,10 +139,20 @@ class SudokuMainWindowController {
                 }
             }
             val result = sudokuProcessor.validateSudoku(valuesArr)
+            validationResult = "Sudoku is valid"
         } catch (e: InvalidSudokuException) {
-            println(e.message)
-            return
+            validationResult = e.message ?: "Sudoku is invalid"
         }
-        println("Sudoku is valid!")
+
+        val dialog = Stage()
+        dialog.initModality(Modality.APPLICATION_MODAL)
+        val dialogVbox = VBox(20.0)
+        dialogVbox.children.add(Text(validationResult))
+        dialogVbox.style = " -fx-font-size: 15px;"
+        dialogVbox.alignment = Pos.CENTER
+        dialog.initOwner(primaryStage)
+        val dialogScene = Scene(dialogVbox, 300.0, 50.0)
+        dialog.scene = dialogScene
+        dialog.show()
     }
 }

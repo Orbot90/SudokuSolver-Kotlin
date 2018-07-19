@@ -12,6 +12,8 @@ class SudokuApplication : Application() {
         val mainDialog: Parent = loader.load()
         primaryStage.title = "Sudoku Solver"
         primaryStage.scene = Scene(mainDialog, 600.0, 700.0)
+        val controller = loader.getController<Any>() as SudokuMainWindowController
+        controller.primaryStage = primaryStage
         primaryStage.show()
     }
 }
